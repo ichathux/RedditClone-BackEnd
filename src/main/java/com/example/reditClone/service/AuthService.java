@@ -1,5 +1,6 @@
 package com.example.reditClone.service;
 
+import com.auth0.jwt.JWT;
 import com.example.reditClone.dto.AuthenticationResponse;
 import com.example.reditClone.dto.LoginRequest;
 import com.example.reditClone.dto.RegisterRequest;
@@ -12,15 +13,19 @@ import com.example.reditClone.repository.VerificationTokenRepository;
 //import com.example.reditClone.security.JwtProvider;
 import com.example.reditClone.security.JwtTokenService;
 import lombok.AllArgsConstructor;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,4 +94,13 @@ public class AuthService {
         String token = jwtProvider.generateToken((UserDetails) authentication.getCredentials());
         return new AuthenticationResponse(token, loginRequest.getUsername());
     }
+
+    @Transactional(readOnly = true)
+    public User getCurrentUser() {
+        Jwt principal = (Jwt) SecurityContextHolder.
+                getContext().getAuthentication().getPrincipal();
+        return userRepository.findByUsername(principal.getSubject())
+                .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getSubject()));
+    }
+
 }
