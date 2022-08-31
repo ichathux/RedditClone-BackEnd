@@ -31,10 +31,11 @@ public class PostService {
     private final UserRepository userRepository;
 
     public Post save(PostRequest postRequest) {
+
         SubReddit subReddit = subRedditRepository.findByName(postRequest.getSubredditName())
                 .orElseThrow(() -> new SpringRedditException("Subreddit not found"));
         User currentUser = authService.getCurrentUser();
-        return postMapper.map(postRequest,subReddit, currentUser);
+        return postRepository.save(postMapper.map(postRequest,subReddit, currentUser));
     }
     @Transactional(readOnly = true)
     public PostResponse getPost(Long id) {
@@ -53,18 +54,16 @@ public class PostService {
     public List<PostResponse> getPostsBySubreddit(Long id) {
         SubReddit subReddit = subRedditRepository.findById(id)
                 .orElseThrow(() -> new SpringRedditException("No subreddit fot given ID"));
-        List<PostResponse> postResponses = postRepository.findAllBySubReddit(subReddit).stream()
+        return postRepository.findAllBySubReddit(subReddit).stream()
                 .map(postMapper::mapToDto)
                 .collect(Collectors.toList());
-        return postResponses;
     }
 
     public List<PostResponse> getPostsByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new SpringRedditException("Can't find user by given username"));
-        List<PostResponse> postResponses = postRepository.findAllByUser(user).stream()
+        return postRepository.findAllByUser(user).stream()
                 .map(postMapper::mapToDto)
                 .collect(Collectors.toList());
-        return postResponses;
     }
 }

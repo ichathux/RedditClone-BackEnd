@@ -1,6 +1,5 @@
 package com.example.reditClone.service;
 
-import com.auth0.jwt.JWT;
 import com.example.reditClone.dto.AuthenticationResponse;
 import com.example.reditClone.dto.LoginRequest;
 import com.example.reditClone.dto.RegisterRequest;
@@ -10,10 +9,9 @@ import com.example.reditClone.model.User;
 import com.example.reditClone.model.VerifcationToken;
 import com.example.reditClone.repository.UserRepository;
 import com.example.reditClone.repository.VerificationTokenRepository;
-//import com.example.reditClone.security.JwtProvider;
 import com.example.reditClone.security.JwtTokenService;
 import lombok.AllArgsConstructor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,12 +24,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.security.Principal;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
@@ -97,10 +97,12 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public User getCurrentUser() {
-        Jwt principal = (Jwt) SecurityContextHolder.
-                getContext().getAuthentication().getPrincipal();
-        return userRepository.findByUsername(principal.getSubject())
-                .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getSubject()));
+        log.info("getting current user");
+        log.info("getting current user : "+SecurityContextHolder.getContext().getAuthentication().getPrincipal() );
+        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        log.info(principal.getUsername());
+        return userRepository.findByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getUsername()));
     }
 
 }
