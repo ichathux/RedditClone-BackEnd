@@ -35,6 +35,7 @@ public class PostService {
         SubReddit subReddit = subRedditRepository.findByName(postRequest.getSubredditName())
                 .orElseThrow(() -> new SpringRedditException("Subreddit not found"));
         User currentUser = authService.getCurrentUser();
+//        postRequest.setVoteCount(0);
         return postRepository.save(postMapper.map(postRequest,subReddit, currentUser));
     }
     @Transactional(readOnly = true)

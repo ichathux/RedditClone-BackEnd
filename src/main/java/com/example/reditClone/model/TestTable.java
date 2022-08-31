@@ -6,18 +6,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.bytebuddy.implementation.bind.annotation.Default;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.time.Instant;
 
-@Data //generate getters and setters
 @Entity
-@Builder //generate builder method for class
-@AllArgsConstructor //generate constructors for class
-@NoArgsConstructor //generate constructors for class
-public class Post {
-
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class TestTable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
