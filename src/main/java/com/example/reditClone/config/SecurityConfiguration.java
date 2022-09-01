@@ -29,6 +29,14 @@ public class SecurityConfiguration {
         http
                 .authorizeHttpRequests((authz) -> authz
                         .antMatchers("/api/auth/**").permitAll()
+                        .antMatchers("/v2/api-docs",
+                                "/configuration/ui",
+                                "/swagger-resources/**",
+                                "/configuration/security",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html**",
+                                "/webjars/**").permitAll()
                         .anyRequest()
                         .authenticated()
                 )
