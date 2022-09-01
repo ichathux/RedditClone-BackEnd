@@ -1,4 +1,4 @@
-package com.example.reditClone.security;
+package com.example.reditClone.service;
 
 import com.example.reditClone.dto.SubredditDto;
 import com.example.reditClone.exception.SpringRedditException;

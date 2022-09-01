@@ -2,6 +2,7 @@ package com.example.reditClone.service;
 
 import com.example.reditClone.dto.AuthenticationResponse;
 import com.example.reditClone.dto.LoginRequest;
+import com.example.reditClone.dto.RefreshTokenRequest;
 import com.example.reditClone.dto.RegisterRequest;
 import com.example.reditClone.exception.SpringRedditException;
 import com.example.reditClone.model.NotificationEmail;
@@ -19,12 +20,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import java.security.Principal;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,6 +39,7 @@ public class AuthService {
     private final MailService mailService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService jwtProvider;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public void signUp(RegisterRequest request){
@@ -91,8 +91,13 @@ public class AuthService {
                 ,loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtProvider.generateToken((UserDetails) authentication.getCredentials());
-        return new AuthenticationResponse(token, loginRequest.getUsername());
+        String token = jwtProvider.generateToken(authentication);
+        return AuthenticationResponse.builder()
+                .authenticationToken(token)
+                .refreshToken(refreshTokenService.generateRefreshToken().getToken())
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .username(loginRequest.getUsername())
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -105,4 +110,14 @@ public class AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getUsername()));
     }
 
+    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshToken) {
+        refreshTokenService.validateRefreshToken(refreshToken.getRefreshToken());
+        String token = jwtProvider.generateTokenWithUsername(refreshToken.getUsername());
+        return AuthenticationResponse.builder()
+                .authenticationToken(token)
+                .refreshToken(refreshToken.getRefreshToken())
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .username(refreshToken.getUsername())
+                .build();
+    }
 }

@@ -1,7 +1,7 @@
 package com.example.reditClone.controller;
 
 import com.example.reditClone.dto.SubredditDto;
-import com.example.reditClone.security.SubredditService;
+import com.example.reditClone.service.SubredditService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
